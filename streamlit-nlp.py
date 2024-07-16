@@ -17,15 +17,20 @@ def load_detection_history(filename="detection_history.pkl"):
             return pickle.load(file)
     return []
 
+# Initialize session state
+def initialize_session_state():
+    if 'detection_history' not in st.session_state:
+        st.session_state['detection_history'] = load_detection_history()
+
+# Call the function to initialize session state
+initialize_session_state()
+
 # Load saved model
 model_fraud = pickle.load(open('model_fraud.sav', 'rb'))
 loaded_vec = TfidfVectorizer(decode_error="replace", vocabulary=set(pickle.load(open("new_selected_feature_tf-idf.sav", "rb"))))
 
 # Load dataset for display
 dataset = pd.read_csv("clean_data.csv")
-
-# Load historical data
-detection_history = load_detection_history()
 
 # Sidebar with option menu
 with st.sidebar:
@@ -71,8 +76,8 @@ elif page == "Aplikasi Deteksi":
                 'text': clean_teks,
                 'prediction': fraud_detection
             }
-            detection_history.append(detection_entry)
-            save_detection_history(detection_history)
+            st.session_state['detection_history'].append(detection_entry)
+            save_detection_history(st.session_state['detection_history'])
 
 # Halaman Tabel Dataset
 elif page == "Tabel Dataset":
@@ -84,9 +89,9 @@ elif page == "Tabel Dataset":
     
     # Tampilkan histori deteksi
     st.subheader('Histori Deteksi SMS')
-    if detection_history:
+    if st.session_state['detection_history']:
         # Mengubah histori menjadi DataFrame
-        history_df = pd.DataFrame(detection_history)
+        history_df = pd.DataFrame(st.session_state['detection_history'])
         st.dataframe(history_df)
     else:
         st.write("Belum ada histori deteksi.")
