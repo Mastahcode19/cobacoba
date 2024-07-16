@@ -17,10 +17,24 @@ def load_detection_history(filename="detection_history.pkl"):
             return pickle.load(file)
     return []
 
+# Fungsi untuk menyimpan session state
+def save_session_state(session_state, filename="session_state.pkl"):
+    with open(filename, 'wb') as file:
+        pickle.dump(session_state, file)
+
+# Fungsi untuk memuat session state
+def load_session_state(filename="session_state.pkl"):
+    if os.path.exists(filename):
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
+    return {}
+
 # Initialize session state
 def initialize_session_state():
     if 'detection_history' not in st.session_state:
         st.session_state['detection_history'] = load_detection_history()
+    if 'session_data' not in st.session_state:
+        st.session_state.update(load_session_state())
 
 # Call the function to initialize session state
 initialize_session_state()
@@ -95,3 +109,6 @@ elif page == "Tabel Dataset":
         st.dataframe(history_df)
     else:
         st.write("Belum ada histori deteksi.")
+
+# Simpan session state saat aplikasi berhenti
+save_session_state(st.session_state)
